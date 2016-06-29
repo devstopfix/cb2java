@@ -18,8 +18,16 @@
  */
 package net.sf.cb2java.data;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+
+import net.sf.cb2java.copybook.Copybook;
 
 public class Record extends GroupData
 {
@@ -49,6 +57,47 @@ public class Record extends GroupData
             group.put(child.getName(), child.toPOJO());
         }
         return group;
+    }
+
+    
+    @Override
+    public <T> T toPOJO(Class<T> clazz) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+        T ret = clazz.newInstance();
+        HashMap<String, Field> retMap = Copybook.mapPojo(clazz);
+        
+        
+        for (String path : retMap.keySet()) {
+			Field field = retMap.get(path);
+			
+			Class<?> fieldType = field.getType(); 
+			
+			Data data = ((Data)getChildFromPath(path));
+			
+			if (!field.isAccessible()) field.setAccessible(true);
+			
+			if(!fieldType.isAssignableFrom(List.class)){
+				field.set(ret, data.toPOJO(fieldType));
+				continue;
+			}
+			
+				
+			List<Object> listValue = (List<Object>) field.get(ret);
+			if(listValue==null) {
+				listValue = new ArrayList<Object>();
+				field.set(ret, listValue);
+			}
+			
+			Type genericType = ((ParameterizedType)field.getGenericType()).getActualTypeArguments()[0];
+			Class<?> genericClass = Class.forName(genericType.getTypeName());
+			for (int i = 0; i < data.getDefinition().getOccurs(); i++) {
+				data = ((Data)getChildFromPath(path + "[" + (i + 1) + "]"));
+				listValue.add(data.toPOJO(genericClass));
+			}
+
+				
+		}
+        
+        return ret;
     }
     
 }

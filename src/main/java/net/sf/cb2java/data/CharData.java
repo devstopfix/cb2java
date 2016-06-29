@@ -18,6 +18,8 @@
  */
 package net.sf.cb2java.data;
 
+import java.math.BigDecimal;
+
 import net.sf.cb2java.types.Characters;
 
 /**
@@ -93,4 +95,21 @@ public class CharData extends ValueData
         // todo make this a right-trim
         return this.getString();
     }
+
+	@Override
+	public <T> T toPOJO(Class<T> clazz) throws InstantiationException, IllegalAccessException {
+		if(clazz.equals(Integer.class)){
+			return (T) Integer.getInteger((String)getValue());
+		}else if(clazz.equals(Long.class)){
+			return (T) Long.getLong((String)getValue());
+		}else if(clazz.equals(Double.class)){
+			return (T) Double.valueOf((String)getValue());
+		}else if(clazz.equals(Boolean.class)){
+			return (T) Boolean.valueOf((String)getValue());
+		}else if(clazz.equals(BigDecimal.class)){
+			return (T) new BigDecimal((String)getValue());
+		} 
+		
+		return (T) getValue();
+	}
 }

@@ -150,4 +150,7 @@ public abstract class Data
      * @return the copybook data as Plain Java Objects
      */
     protected abstract Object toPOJO();
+
+    
+	public abstract <T> T toPOJO(Class<T> clazz) throws InstantiationException, IllegalAccessException, ClassNotFoundException;
 }

@@ -108,16 +108,8 @@ public class Group extends Element
         for (Iterator i = children.iterator(); i.hasNext();) {
             final Element element = (Element) i.next();
             for (int j = 0; j < element.getOccurs(); j++) {
-//                final int p = pos;
                 final int end = pos + element.getLength();
-    //            System.out.println(pos + " " + end + " " + input.length());
                 dataChildren.add(element.parse(sub(bytes, pos, end)));
-//                dataChildren.add(new DataHolder() {
-//                    public Data evaluate()
-//                    {
-//                       return element.parse(sub(bytes, p, end));
-//                    }
-//                });
                 
                 pos = end;
             }
