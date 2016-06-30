@@ -9,10 +9,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import junit.framework.TestCase;
 import net.sf.cb2java.copybook.pojos.B;
+import net.sf.cb2java.copybook.pojos.Sub;
 import net.sf.cb2java.data.Data;
-import net.sf.cb2java.data.GroupData;
 import net.sf.cb2java.data.Record;
 
 /**
@@ -118,7 +119,11 @@ public class CopybookParserTest extends TestCase {
     
     
     public void testMapPojoAnnotation(){
-    	HashMap<String, Field> ret = Copybook.mapPojo(B.class);
+    	HashMap<String, Field> retB = Copybook.mapPojo(B.class);
+    	assertEquals(1, retB.size());
+
+    	HashMap<String, Field> retSUB = Copybook.mapPojo(Sub.class);
+    	assertEquals(2, retSUB.size());
     	
     }
     public void testToPojoObject() throws FileNotFoundException, IOException, InstantiationException, IllegalAccessException, ClassNotFoundException {
