@@ -128,16 +128,20 @@ public class FloatingData extends ValueData
 
 	@Override
 	public <T> T toPOJO(Class<T> clazz) throws InstantiationException, IllegalAccessException {
+		Object v = null;
+
 		if(clazz.equals(Integer.class)){
-			return (T) Integer.valueOf(((BigDecimal)getValue()).intValue());
+			v = Integer.valueOf(((BigDecimal)getValue()).intValue());
 		}else if(clazz.equals(Long.class)){
-			return (T) Long.valueOf(((BigDecimal)getValue()).longValue());
+			v = Long.valueOf(((BigDecimal)getValue()).longValue());
 		}else if(clazz.equals(Double.class)){
-			return (T) Double.valueOf(((BigDecimal)getValue()).doubleValue());
+			v = Double.valueOf(((BigDecimal)getValue()).doubleValue());
 		}else if(clazz.equals(Boolean.class)){
-			return (T) Boolean.valueOf(((BigDecimal)getValue()).byteValue()>0);
-		} 
+			v = Boolean.valueOf(((BigDecimal)getValue()).byteValue()>0);
+		} else{
+			v = ((BigDecimal)getValue());
+		}
 		
-		return (T) ((BigDecimal)getValue());
+		return (T) v;
 	}
 }

@@ -98,18 +98,22 @@ public class CharData extends ValueData
 
 	@Override
 	public <T> T toPOJO(Class<T> clazz) throws InstantiationException, IllegalAccessException {
-		if(clazz.equals(Integer.class)){
-			return (T) Integer.getInteger((String)getValue());
-		}else if(clazz.equals(Long.class)){
-			return (T) Long.getLong((String)getValue());
-		}else if(clazz.equals(Double.class)){
-			return (T) Double.valueOf((String)getValue());
-		}else if(clazz.equals(Boolean.class)){
-			return (T) Boolean.valueOf((String)getValue());
-		}else if(clazz.equals(BigDecimal.class)){
-			return (T) new BigDecimal((String)getValue());
-		} 
+		Object v = null;
 		
-		return (T) getValue();
+		if(clazz.equals(Integer.class)){
+			v = Integer.getInteger((String)getValue());
+		}else if(clazz.equals(Long.class)){
+			v = Long.getLong((String)getValue());
+		}else if(clazz.equals(Double.class)){
+			v = Double.valueOf((String)getValue());
+		}else if(clazz.equals(Boolean.class)){
+			v = Boolean.valueOf((String)getValue());
+		}else if(clazz.equals(BigDecimal.class)){
+			v = new BigDecimal((String)getValue());
+		} else{
+			v = getValue();
+		}
+		
+		return (T) v;
 	}
 }

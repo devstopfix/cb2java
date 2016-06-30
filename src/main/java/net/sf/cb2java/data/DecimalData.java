@@ -101,16 +101,20 @@ public class DecimalData extends NumericData
 
 	@Override
 	public <T> T toPOJO(Class<T> clazz) throws InstantiationException, IllegalAccessException {
-		if(clazz.equals(Integer.class)){
-			return (T) Integer.valueOf(((BigDecimal)getValue()).intValue());
-		}else if(clazz.equals(Long.class)){
-			return (T) Long.valueOf(((BigDecimal)getValue()).longValue());
-		}else if(clazz.equals(Double.class)){
-			return (T) Double.valueOf(((BigDecimal)getValue()).doubleValue());
-		}else if(clazz.equals(Boolean.class)){
-			return (T) Boolean.valueOf(((BigDecimal)getValue()).byteValue()>0);
-		} 
+		Object v = null;
 		
-		return (T) ((BigDecimal)getValue());
+		if(clazz.equals(Integer.class)){
+			v = Integer.valueOf(((BigDecimal)getValue()).intValue());
+		}else if(clazz.equals(Long.class)){
+			v = Long.valueOf(((BigDecimal)getValue()).longValue());
+		}else if(clazz.equals(Double.class)){
+			v = Double.valueOf(((BigDecimal)getValue()).doubleValue());
+		}else if(clazz.equals(Boolean.class)){
+			v = Boolean.valueOf(((BigDecimal)getValue()).byteValue()>0);
+		} else{
+			v = ((BigDecimal)getValue());
+		}
+		
+		return (T) v;
 	}
 }
