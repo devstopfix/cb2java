@@ -117,7 +117,9 @@ public class CopybookParserTest extends TestCase {
         //System.out.println(Arrays.toString(sub.toArray()));
     }
     
-    
+    /**
+     * Alan Ferreira
+     */
     public void testMapPojoAnnotation(){
     	HashMap<String, Field> retB = Copybook.mapPojo(B.class);
     	assertEquals(1, retB.size());
@@ -126,6 +128,11 @@ public class CopybookParserTest extends TestCase {
     	assertEquals(2, retSUB.size());
     	
     }
+
+    
+    /**
+     * Alan Ferreira
+     */
     public void testToPojoObject() throws FileNotFoundException, IOException, InstantiationException, IllegalAccessException, ClassNotFoundException {
         Copybook copybook = CopybookParser.parse("B", new FileInputStream(new File("./target/test-classes/b.copybook")));
         assertEquals(31, copybook.getLength());
