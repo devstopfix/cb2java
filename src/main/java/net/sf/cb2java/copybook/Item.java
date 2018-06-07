@@ -20,6 +20,8 @@ package net.sf.cb2java.copybook;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+
 import net.sf.cb2java.Settings;
 import net.sf.cb2java.Value;
 import net.sf.cb2java.Values;
@@ -30,8 +32,8 @@ import net.sf.cb2java.types.Decimal;
 import net.sf.cb2java.types.Element;
 import net.sf.cb2java.types.Floating;
 import net.sf.cb2java.types.Group;
-import net.sf.cb2java.types.Numeric;
 import net.sf.cb2java.types.Packed;
+import net.sf.cb2java.types.SignPosition;
 import net.sf.cb2java.types.SignedSeparate;
 
 /**
@@ -42,14 +44,22 @@ class Item
     final boolean document;
     
     final Values values;
+
+    public Settings getSettings() {
+        return settings;
+    }
+
+    final Settings settings;
     
     /**
      * @param analyzer
      */
-    Item(final Values values, final boolean document)
+    Item(final Values values, final boolean document, Settings settings)
     {
         this.values = values;
         this.document = document;
+        this.settings = settings;
+        signPosition = settings.getSignPosition();
     }
 
     String name;
@@ -57,7 +67,7 @@ class Item
     Item parent;
     int length;
     
-    List children = new ArrayList();
+    List<Item> children = new ArrayList<Item>();
     
     String redefines;
     int occurs = 1;
@@ -66,7 +76,7 @@ class Item
     
     boolean isAlpha;
     boolean signSeparate;
-    SignedSeparate.Position signPosition = Settings.DEFAULT.getSignPosition();
+    SignPosition signPosition;
     
     String picture;
     Value value;
@@ -128,7 +138,7 @@ class Item
     
     private void createDocument()
     {
-        element = new Copybook(name, values);
+        element = new Copybook(name, values, settings);
     }
     
     private void createGroup()
@@ -148,20 +158,17 @@ class Item
     
     private void createPacked()
     {
-        element = new Packed(name, level, occurs, picture);
-        ((Numeric) element).setSignPosition(signPosition);
+        element = new Packed(name, level, occurs, picture, signPosition);
     }
     
     private void createSignedSeparate()
     {
-        element = new SignedSeparate(name, level, occurs, picture);
-        ((Numeric) element).setSignPosition(signPosition);
+        element = new SignedSeparate(name, level, occurs, picture, signPosition);
     }
     
     private void createDecimal()
     {
-        element = new Decimal(name, level, occurs, picture);
-        ((Numeric) element).setSignPosition(signPosition);
+        element = new Decimal(name, level, occurs, picture, signPosition);
     }
     
     private void createAlphaNumeric()

@@ -30,8 +30,7 @@ import net.sf.cb2java.data.GroupData;
 import net.sf.cb2java.data.Record;
 import net.sf.cb2java.types.Element;
 import net.sf.cb2java.types.Group;
-import net.sf.cb2java.types.Numeric;
-import net.sf.cb2java.types.Numeric.Position;
+import net.sf.cb2java.types.SignPosition;
 
 /**
  * Represents a copybook data definition in memory
@@ -41,14 +40,9 @@ import net.sf.cb2java.types.Numeric.Position;
  * 
  * @author James Watson
  */
-public class Copybook extends Group implements Settings
+public class Copybook extends Group //implements Settings
 {
-    private String encoding = Settings.DEFAULT.getEncoding();
-    private boolean littleEndian = Settings.DEFAULT.getLittleEndian();
-    private String floatConversion = Settings.DEFAULT.getFloatConversion();
-    private Numeric.Position signPosition = Settings.DEFAULT.getSignPosition();
-    
-    private Map redefines = new HashMap();
+    private Map<String, Element> redefines = new HashMap<String, Element>();
     
     private final Values values;
     
@@ -57,12 +51,13 @@ public class Copybook extends Group implements Settings
      *
      * @param name the name of the copybook
      */
-    Copybook(String name, Values values)
+    Copybook(String name, Values values, Settings settings)
     {
         super(name, 0, 0);
         
         this.values = values;
-        values.setEncoding(encoding);
+        this.setSettings(settings);
+        this.values.setEncoding(settings.getEncoding());
     }
     
     public Values getValues()
@@ -101,7 +96,7 @@ public class Copybook extends Group implements Settings
      */
     public Record createNew()
     {
-        return new Record(getName(), (GroupData) super.create());
+        return new Record((GroupData) super.create());
     }
     
     /**
@@ -113,7 +108,7 @@ public class Copybook extends Group implements Settings
      */
     public Record parseData(byte[] data) throws IOException
     {
-        return new Record(getName(), (GroupData) parse(data));
+        return new Record((GroupData) parse(data));
     }
     
     public List<Record> parseData(InputStream stream) throws IOException
@@ -122,64 +117,13 @@ public class Copybook extends Group implements Settings
         List<Record> list = new ArrayList<Record>();
         
         while (buffer.hasNext()) {
-            list.add(new Record(getName(), (GroupData) parse(buffer.getNext())));
+            list.add(new Record((GroupData) parse(buffer.getNext())));
         }
         
         return list;
     }
-    
-    /**
-     * Sets the encoding for the copybook instance, used for parsing
-     * and writing of data
-     * 
-     * @param encoding the encoding for the system
-     */
-    public void setEncoding(String encoding)
-    {
-        this.encoding = encoding;
-    }
-    
-    /**
-     * retrieves the current encoding for text
-     * 
-     * @return the encoding for text
-     */
-    public String getEncoding()
-    {
-        return encoding;
-    }
-    
-    public void setLittleEndian(boolean littleEndian)
-    {
-        this.littleEndian = littleEndian;
-    }
-    
-    public boolean getLittleEndian()
-    {
-        return littleEndian;
-    }
-    
-    public void setFloatConversion(String className)
-    {
-        this.floatConversion = className;
-    }
-    
-    public String getFloatConversion()
-    {
-        return floatConversion;
-    }
-    
-    public void getSignPosition(Position position)
-    {
-        this.signPosition = position;
-    }
-    
-    public Position getSignPosition()
-    {
-        return signPosition;
-    }
-    
-    /**
+
+	/**
      * a helper class for buffering the data as it is processed
      * 
      * @author James Watson
@@ -232,11 +176,7 @@ public class Copybook extends Group implements Settings
         
         public boolean hasNext()
         {
-            if (!(position < size)) {
-                if (!getMore()) return false;
-            }
-            
-            return true;
+            return (position < size) || getMore();
         }
         
         private int nextEnd()
@@ -263,4 +203,5 @@ public class Copybook extends Group implements Settings
             return bytes;
         }
     }
+
 }

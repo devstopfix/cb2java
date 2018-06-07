@@ -24,15 +24,13 @@ import java.util.List;
 import net.sf.cb2java.types.Element;
 
 /**
- * The base type for all Data elements
+ * The base type for all Data elements.
  * 
  * @author James Watson
  */
-public abstract class Data
-{
+public abstract class Data {
     /**
-     * the string used to indent data in
-     * toString methods
+     * the string used to indent data in toString() methods
      */
     static final String INDENT = "  ";
     
@@ -43,16 +41,14 @@ public abstract class Data
      * 
      * @param definition the underlying type definition
      */
-    public Data(final Element definition)
-    {
+    public Data(final Element definition) {
         this.definition = definition;
     }
     
     /**
      * returns the name of the type that defines this element
      */
-    public String getName()
-    {
+    public String getName() {
         return getDefinition().getName();
     }
     
@@ -74,8 +70,7 @@ public abstract class Data
     /**
      * the underlying type definition of the element
      */
-    public Element getDefinition()
-    {
+    public final Element getDefinition() {
         return definition;
     }
     
@@ -86,23 +81,18 @@ public abstract class Data
     
     /**
      * Sets the internal value of this item.  If the data is not
-     * compatible with this type, an Exception will be thrown.  See
-     * the documentation of the specific subtypes for a list of 
+     * compatible or valid with this type, an Exception will be thrown.
+     * See the documentation of the specific subtypes for a list of 
      * acceptable types and other rules for valid input.
      * 
-     * @param data the data to set.  Must be compatible with the
-     * the instance.
+     * @param data the data to set.  Must be compatible and valid 
+     * with the instance.
      */
-    public final void setValue(Object data)
-    {
-        //TODO setting?
-//        validate(data);
-        
+    public final void setValue(Object data) {
         setValueImpl(data);
     }
     
-    public final void setValue(String data)
-    {
+    public final void setValue(String data) {
         setValue(translate(data));
     }
     
@@ -116,13 +106,12 @@ public abstract class Data
     protected abstract void setValueImpl(Object data);
     
     /**
-     * 
+     * write content to an outputstream. 
      * 
      * @param stream
      * @throws IOException
      */
-    public void write(OutputStream stream) throws IOException
-    {
+    public void write(OutputStream stream) throws IOException {
         getDefinition().write(stream, getValue());
     }
     
@@ -131,8 +120,7 @@ public abstract class Data
      * 
      * @param data the data to validate
      */
-    public final void validate(Object data)
-    {
+    public final void validate(Object data) {
         getDefinition().validate(data);
     }
     

@@ -1,40 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-                      http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-  
-    <name>cb2java</name>
+
     <groupId>net.sf.cb2java</groupId>
     <artifactId>cb2java</artifactId>
-    <version>5.3</version>
-    <url>https://github.com/devstopfix/cb2java</url>
+    <version>5.4.0</version>
 
+    <name>cb2java</name>
     <description>Library that allows dynamic access to Copybook structures at run-time from a Java application</description>
+    <url>https://github.com/johnhearn/cb2java</url>
+    <inceptionYear>2006</inceptionYear>
 
-    <developers>
-        <developer>
-            <id>dubwai</id>
-            <url>http://sourceforge.net/users/dubwai</url>
-            <roles>
-                <role>developer</role>
-            </roles>
-        </developer>
-        <developer>
-            <id>ptrthomas</id>
-            <name>Peter Thomas</name>
-            <url>http://ptrthomas.users.sourceforge.net/</url>
-            <roles>
-                <role>developer</role>
-            </roles>
-        </developer>
-        <developer>
-            <id>montoyaedu</id>
-            <name>H. Eduardo Montoya Sánchez</name>
-            <url>https://github.com/montoyaedu</url>
-        </developer>
-    </developers>
+    <scm>
+        <url>https://github.com/johnhearn/cb2java</url>
+        <connection>scm:git:git://github.com/johnhearn/cb2java.git</connection>
+    </scm>
 
     <licenses>
         <license>
@@ -44,34 +25,9 @@
         </license>
     </licenses>
 
-    <scm>
-        <url>https://github.com/devstopfix/cb2java</url>
-        <connection>scm:git:git://github.com/devstopfix/cb2java.git</connection>
-    </scm>
-
-    <build>
-        <resources>
-            <!-- data files required to parse copybooks -->
-            <resource>
-                <directory>src/main/java</directory>
-                <includes>
-                    <include>**/lexer.dat</include>
-                    <include>**/parser.dat</include>
-                </includes>
-            </resource>
-        </resources>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
-                <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 
     <dependencies>
         <dependency>
@@ -81,5 +37,239 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>sablecc-maven-plugin</artifactId>
+                <version>2.2</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.7</version>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/generated-sources/sablecc</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.0.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.10.4</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <quiet>true</quiet>
+                            <failOnError>false</failOnError>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.eclipse.m2e</groupId>
+                    <artifactId>lifecycle-mapping</artifactId>
+                    <version>1.0.0</version>
+                    <configuration>
+                        <lifecycleMappingMetadata>
+                            <pluginExecutions>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>org.codehaus.mojo</groupId>
+                                        <artifactId>sablecc-maven-plugin</artifactId>
+                                        <versionRange>[2.2,)</versionRange>
+                                        <goals>
+                                            <goal>generate</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <execute>
+                                            <runOnIncremental>false</runOnIncremental>
+                                        </execute>
+                                    </action>
+                                </pluginExecution>
+                            </pluginExecutions>
+                        </lifecycleMappingMetadata>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-project-info-reports-plugin</artifactId>
+                    <version>2.8.1</version>
+                </plugin>
+                
+	            <plugin>
+    	            <groupId>org.codehaus.mojo</groupId>
+        	        <artifactId>cobertura-maven-plugin</artifactId>
+            	    <version>2.7</version>
+                	<configuration>
+                		<instrumentation>
+	                    	<excludes>
+    	                    	<exclude>net/sf/cb2xml/**</exclude>
+	        	            </excludes>
+    	            	</instrumentation>
+        	        </configuration>
+            	</plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>findbugs-maven-plugin</artifactId>
+                <version>3.0.4</version>
+                <configuration>
+                    <onlyAnalyze>net.sf.cb2java.*</onlyAnalyze>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>2.17</version>
+                <configuration>
+                    <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>3.7</version>
+                <configuration>
+                    <excludes>
+                        <exclude>**/net/sf/cb2xml/**</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jxr-plugin</artifactId>
+                <version>2.5</version>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>cobertura-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </reporting>
+
+    <developers>
+        <developer>
+            <name>James Watson</name>
+            <roles>
+                <role>original author</role>
+            </roles>
+        </developer>
+        <developer>
+            <id>dubwai</id>
+            <url>https://sourceforge.net/u/dubwai/profile/</url>
+            <roles>
+                <role>developer</role>
+            </roles>
+        </developer>
+        <developer>
+            <id>ptrthomas</id>
+            <name>Peter Thomas</name>
+            <url>https://sourceforge.net/u/ptrthomas/profile/</url>
+            <roles>
+                <role>developer</role>
+            </roles>
+        </developer>
+        <developer>
+            <id>devstopfix</id>
+            <name>James Every</name>
+            <url>https://github.com/devstopfix</url>
+            <roles>
+                <role>developer</role>
+            </roles>
+        </developer>
+        <developer>
+            <id>montoyaedu</id>
+            <name>H. Eduardo Montoya Sánchez</name>
+            <url>https://github.com/montoyaedu</url>
+            <roles>
+                <role>developer</role>
+            </roles>
+        </developer>
+        <developer>
+            <id>johnhearn</id>
+            <name>John Hearn</name>
+            <url>https://github.com/johnhearn</url>
+            <roles>
+                <role>developer</role>
+            </roles>
+        </developer>
+        <developer>
+        	<id>BertKoor</id>
+            <name>Bert Koorengevel</name>
+            <url>https://github.com/bertkoor</url>
+            <roles>
+                <role>developer</role>
+            </roles>
+        </developer>
+    </developers>
+
+    <contributors>
+        <contributor>
+            <name>Enrico Comiti</name>
+            <url>https://github.com/enr</url>
+            <roles>
+                <role>contributor</role>
+            </roles>
+        </contributor>
+    </contributors>
 
 </project>

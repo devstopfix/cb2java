@@ -18,93 +18,112 @@
  */
 package net.sf.cb2java;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
-import net.sf.cb2java.types.Numeric;
-import net.sf.cb2java.types.Numeric.Position;
+import net.sf.cb2java.types.SignPosition;
 
-public interface Settings
-{
-    public static Settings DEFAULT = new Default();
-    
-    String getEncoding();
-    
-    Values getValues();
-    
-    boolean getLittleEndian();
-    
-    String getFloatConversion();
-    
-    Numeric.Position getSignPosition();
-    
-    public static class Default implements Settings
-    {
-        private static final String DEFAULT_ENCODING;
-        private static final boolean DEFAULT_LITTLE_ENDIAN;
-        private static final String DEFAULT_FLOAT_CONVERSION;
-        private static final Numeric.Position DEFAULT_DEFAULT_SIGN_POSITION;
-        private static final Values DEFAULT_VALUES = new Values();
-        
-        static {
-            Properties props = new Properties();
-            
-            try {
-                props.load(ClassLoader.getSystemResourceAsStream("copybook.props"));
-            } catch (Exception e) {
-                // TODO logging
-            }  
-            
-            DEFAULT_ENCODING = getSetting("encoding", System.getProperty("file.encoding"), props);
-            DEFAULT_LITTLE_ENDIAN = "false".equals(getSetting("little-endian", "false", props));
-            DEFAULT_FLOAT_CONVERSION = getSetting("float-conversion", 
-                "net.sf.cb2java.copybook.floating.IEEE754", props);
-            DEFAULT_DEFAULT_SIGN_POSITION = "leading".equalsIgnoreCase(
-                getSetting("default-sign-position", "trailing", props)) ? Numeric.LEADING : Numeric.TRAILING;
-        }
-        
-        private static String getSetting(String name, String defaultValue, Properties props)
-        {
-            try {
-                String value = System.getProperty("cb2java." + name, defaultValue);
-                
-                try {
-                    try {
-                        value = props.getProperty("encoding", value);
-                    } catch (Exception e) {
-                        // TODO logging
-                    }
-                } catch (Exception e) {
-                    // TODO logging
-                }
-                
-                return value;
-            } catch (Exception e) {
-                return defaultValue;
-            }
-        }
-        
-        public String getEncoding()
-        {
-            return DEFAULT_ENCODING;
-        }
+public class Settings {
 
-        public String getFloatConversion()
-        {
-            return DEFAULT_FLOAT_CONVERSION;
-        }
+	String encoding = System.getProperty("file.encoding");
+	boolean littleEndian = false;
+	String floatConversion = "net.sf.cb2java.copybook.floating.IEEE754";
+	SignPosition signPosition = SignPosition.TRAILING;
+	int columnStart = 6;
+	int columnEnd = 72;
+	Values values = new Values();
 
-        public boolean getLittleEndian()
-        {
-            return DEFAULT_LITTLE_ENDIAN;
-        }
+	static Settings DEFAULT;
+	static public Settings DEFAULT() {
+		if(DEFAULT == null) {
+			DEFAULT = new Settings();
+			Properties props = new Properties();
 
-        public Values getValues()
-        {
-            return DEFAULT_VALUES;
-        }
+			try (InputStream is = Settings.class.getResourceAsStream("/copybook.props")) {
+				if (is == null) {
+					System.out.println("Could not load 'copybook.props' file, reverting to defaults.");
+				} else {
+					props.load(is);
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.out.println("Could not load 'copybook.props' file, reverting to defaults.");
+			}
 
-        public Position getSignPosition()
-        {
-            return DEFAULT_DEFAULT_SIGN_POSITION;
-        }
-    }
+			DEFAULT.setEncoding(getSetting("encoding", DEFAULT.getEncoding(), props));
+			DEFAULT.setLittleEndian("false".equals(getSetting("little-endian", DEFAULT.isLittleEndian() + "", props)));
+			DEFAULT.setFloatConversion(getSetting("float-conversion", DEFAULT.getFloatConversion(), props));
+			DEFAULT.setSignPosition("leading".equalsIgnoreCase(getSetting("default-sign-position", "trailing", props))
+					? SignPosition.LEADING : SignPosition.TRAILING);
+			DEFAULT.setColumnStart(Integer.parseInt(getSetting("column.start", DEFAULT.getColumnStart() + "", props)));
+			DEFAULT.setColumnEnd(Integer.parseInt(getSetting("column.end", DEFAULT.getColumnEnd() + "", props)));
+		}
+		return DEFAULT;
+	}
+
+	public String getEncoding() {
+		return encoding;
+	}
+
+	public void setEncoding(String encoding) {
+		this.encoding = encoding;
+	}
+
+	public boolean isLittleEndian() {
+		return littleEndian;
+	}
+
+	public void setLittleEndian(boolean littleEndian) {
+		this.littleEndian = littleEndian;
+	}
+
+	public String getFloatConversion() {
+		return floatConversion;
+	}
+
+	public void setFloatConversion(String floatConversion) {
+		this.floatConversion = floatConversion;
+	}
+
+	public SignPosition getSignPosition() {
+		return signPosition;
+	}
+
+	public void setSignPosition(SignPosition signPosition) {
+		this.signPosition = signPosition;
+	}
+
+	public int getColumnStart() {
+		return columnStart;
+	}
+
+	public void setColumnStart(int columnStart) {
+		this.columnStart = columnStart;
+	}
+
+	public int getColumnEnd() {
+		return columnEnd;
+	}
+
+	public void setColumnEnd(int columnEnd) {
+		this.columnEnd = columnEnd;
+	}
+
+	public Values getValues() {
+		return values;
+	}
+
+	public void setValues(Values values) {
+		this.values = values;
+	}
+
+	static private String getSetting(String name, String defaultValue, Properties props) {
+		String result = defaultValue;
+		try {
+			result = System.getProperty("cb2java." + name, result);
+			result = props.getProperty(name, result);
+		} catch (RuntimeException e) {
+		}
+		return result;
+	}
 }

@@ -4,11 +4,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import junit.framework.TestCase;
 import net.sf.cb2java.data.Data;
+import net.sf.cb2java.data.IntegerData;
 import net.sf.cb2java.data.Record;
 
 /**
@@ -46,9 +48,15 @@ public class CopybookParserTest extends TestCase {
         assertEquals("ABCDEF", root.getChildren().get(0).toString());
         assertEquals("B", ((Data)root.getChildren().get(1)).getName().toString());
         assertEquals("BCDE", root.getChildren().get(1).toString());
-        // TODO assertEquals(12345, root.getChildren().get(2).toString());
-        // TODO assertEquals(1234, ((Data)root.getChildren().get(3)).getValue());
-        System.out.println(root.toString());
+        
+        Data dat = root.getChildren().get(2);
+        assertTrue(dat instanceof IntegerData);
+        assertEquals(12345, ((IntegerData)dat).getInt());
+        
+        dat = root.getChildren().get(3);
+        assertTrue(dat instanceof IntegerData);
+        assertEquals(1234, ((IntegerData)dat).getInt());
+        //System.out.println(root.toString());
     }
     
     /**
@@ -60,34 +68,59 @@ public class CopybookParserTest extends TestCase {
         Copybook copybook = CopybookParser.parse("B", new FileInputStream(new File("./target/test-classes/b.copybook")));
         List<Record> results = copybook.parseData(new FileInputStream(new File("./target/test-classes/b.input.txt")));
         Map<String,Object>record = results.get(0).toMap();
+        assertEquals(1, record.size());
         assertTrue(record.containsKey("ROOT"));
-        //assertEquals("ABCDEF", root.getChildren().get(0).toString());
-        //assertEquals("B", ((Data)root.getChildren().get(1)).getName().toString());
-        //assertEquals("BCDE", root.getChildren().get(1).toString());
-        // TODO assertEquals(12345, root.getChildren().get(2).toString());
-        // TODO assertEquals(1234, ((Data)root.getChildren().get(3)).getValue());
+        @SuppressWarnings("unchecked") Map<String,Object> root = (Map<String,Object>)record.get("ROOT");
+        
+        assertTrue(root.containsKey("A"));
+        assertEquals("ABCDEF", root.get("A"));
+        
+        assertTrue(root.containsKey("B"));
+        assertEquals("BCDE", root.get("B"));
+        
+        assertTrue(root.containsKey("C"));
+        assertEquals(12345, ((BigInteger)root.get("C")).intValue());
+        
+        assertTrue(root.containsKey("D"));
+        assertEquals(1234, ((BigInteger)root.get("D")).intValue());
     }
     
+    @SuppressWarnings("unchecked")
     public void testRightTrimOfPICXfields() throws FileNotFoundException, IOException {
         Copybook copybook = CopybookParser.parse("B", new FileInputStream(new File("./target/test-classes/b.copybook")));
         List<Record> results = copybook.parseData(new FileInputStream(new File("./target/test-classes/b.input.txt")));
         Map<String,Object>record = results.get(0).toMap();
+        Map<String,Object> root = (Map<String,Object>)record.get("ROOT");
         
-        // TODO assertEquals(" E", record.get(0).toString());
-        // TODO assertEquals("FF", record.get(1).toString());
+        assertTrue(root.containsKey("SUB"));
+        List<Map<String,Object>> sub = (List<Map<String,Object>>)root.get("SUB");
+        assertEquals(2, sub.size());
+        
+        Map<String,Object> subEl = sub.get(0);
+        assertTrue(subEl.containsKey("E"));
+        assertEquals(" E", subEl.get("E"));
+        assertTrue(subEl.containsKey("F"));
+        assertEquals("FF", subEl.get("F"));
+        
+        subEl = sub.get(1);
+        assertTrue(subEl.containsKey("E"));
+        assertEquals("EEE", subEl.get("E"));
+        assertTrue(subEl.containsKey("F"));
+        assertEquals("FFF", subEl.get("F"));
     }
     
+    @SuppressWarnings("unchecked") 
     public void testOccursAsList() throws FileNotFoundException, IOException {
         Copybook copybook = CopybookParser.parse("B", new FileInputStream(new File("./target/test-classes/b.copybook")));
         assertEquals(31, copybook.getLength());
         List<Record> results = copybook.parseData(new FileInputStream(new File("./target/test-classes/b.input.txt")));
         Map<String,Object>record = results.get(0).toMap();
-        List sub = (List) ((Map)record.get("ROOT")).get("SUB");
+        List<Object> sub = (List<Object>) ((Map<String,Object>)record.get("ROOT")).get("SUB");
         assertEquals(2, sub.size());
-        assertEquals("EEE", ((Map)sub.get(1)).get("E").toString());
-        assertEquals("FFF", ((Map)sub.get(1)).get("F").toString());
-        System.out.println(record.toString());
-        System.out.println(Arrays.toString(sub.toArray()));
+        assertEquals("EEE", ((Map<String,Object>)sub.get(1)).get("E").toString());
+        assertEquals("FFF", ((Map<String,Object>)sub.get(1)).get("F").toString());
+        assertEquals("[{E= E, F=FF}, {E=EEE, F=FFF}]", Arrays.toString(sub.toArray()));
+        assertEquals("{ROOT={A=ABCDEF, B=BCDE, C=12345, D=1234, SUB=[{E= E, F=FF}, {E=EEE, F=FFF}]}}", record.toString());
     }
     
 }

@@ -25,124 +25,51 @@ import net.sf.cb2java.data.Data;
 import net.sf.cb2java.data.DecimalData;
 import net.sf.cb2java.data.IntegerData;
 
-public class SignedSeparate extends Numeric
-{
-    private static final String BUG_TEXT = "Caused only by bug. Please create bug report at cb2java at sourceforge.net";
+public class SignedSeparate extends SignedNumeric {
     
-    public SignedSeparate(String name, int level, int occurs, String picture)
-    {
-        super(name, level, occurs, picture);
+    public SignedSeparate(String name, int level, int occurs, String picture, SignPosition signPosition) {
+        super(name, level, occurs, picture, signPosition);
     }
     
-    public SignedSeparate(String name, String picture)
-    {
-        super(name, 0, 1, picture);
-    }
-    
-    public SignedSeparate(String picture)
-    {
-        super("", 0, 1, picture);
-    }
-    
-    public SignedSeparate(String name, int length, int decimalPlaces, boolean signed)
-    {
-        super(name, length, decimalPlaces, signed, null);
-    }
-    
-    public SignedSeparate(int length, int decimalPlaces, boolean signed)
-    {
-        super("", length, decimalPlaces, signed, null);
-    }
-    
-    public SignedSeparate(String name, int length, int decimalPlaces, boolean signed, Position position)
-    {
-        super(name, length, decimalPlaces, signed, position);
-    }
-    
-    public SignedSeparate(int length, int decimalPlaces, boolean signed, Position position)
-    {
-        super("", length, decimalPlaces, signed, position);
-    }
-    
-    public static int getLength(String pic)
-    {
-        int length = 0;
-        
-        for (int i = 0; i < pic.length(); i++) {
-            char c = pic.charAt(i);
-            
-            if (c == '(') {
-                int pos = pic.indexOf(')', i);
-                int times = Integer.parseInt(pic.substring(i + 1, pos));
-                i = pos;
-                length += times;
-            }
-        }
-        
-        return length;
-    }
-    
-    public static int getScale(String pic, int length)
-    {
-        int position = 0;
-        pic = pic.toUpperCase();
-        
-        for (int i = 0; i < pic.length(); i++) {
-            char c = pic.charAt(i);
-            
-            if (c == '(') {
-                int pos = pic.indexOf(')', i);
-                int times = Integer.parseInt(pic.substring(i + 1, pos));
-                i = pos;
-                position += times;
-            } else if (c == 'V') {
-                return length - position;
-            }
-        }
-        
-        return 0;
-    }
-    
-    public Data parse(byte[] bytes)
-    {
+    @Override
+    public Data parse(byte[] bytes) {
         String s = getString(bytes);
         
         char sign;
         
-        if (getSignPosition() == LEADING) {
+        if (getSignPosition() == SignPosition.LEADING) {
             sign = s.charAt(0);
-        } else if (getSignPosition() == TRAILING) {
+        } else if (getSignPosition() == SignPosition.TRAILING) {
             sign = s.charAt(s.length() - 1);
             s = sign + s.substring(0, s.length() - 1);
         } else {
-            throw new RuntimeException(BUG_TEXT);
+            throw new IllegalStateException("undefined sign position");
         }
         
-        if (sign != '+' && sign != '-') throw new IllegalArgumentException(getName() + " is sign separate "
-            + (getSignPosition() == LEADING ? "leading" : "trailing") + " but no sign was found on value " + s);
+        if (sign != '+' && sign != '-') {
+        	throw new IllegalArgumentException(getName() + " is sign separate "
+            + (getSignPosition() == SignPosition.LEADING ? "leading" : "trailing") + " but no sign was found on value " + s);
+        }
         
-        if (sign == '+') s = s.substring(1);
+        if (sign == '+') {
+        	s = s.substring(1);
+        }
 
         BigInteger big = new BigInteger(s);
         Data data = create();
         
         if (data instanceof DecimalData) {
             DecimalData dData = (DecimalData) data;
-            
             dData.setValue(new BigDecimal(big, decimalPlaces()));
-            
-            return data;
         } else {
             IntegerData iData = (IntegerData) data;
-            
             iData.setValue(big);
-            
-            return data;
         }
+        return data;
     }
     
-    public byte[] toBytes(Object data)
-    {
+    @Override
+    public byte[] toBytes(Object data) {
         String s;
         boolean positive;
         
@@ -151,37 +78,29 @@ public class SignedSeparate extends Numeric
             s = "";
         } else {
             BigInteger bigI = getUnscaled(data);
-        
-            positive = ZERO.unscaledValue().compareTo(bigI) < 0;
-            
+            positive = BigDecimal.ZERO.unscaledValue().compareTo(bigI) < 0;
             s = bigI.toString();
         }
         
         char sign = positive ? '+' : '-';
-        
-//        s = getValue().fillString(s, getLength() - 1, Value.LEFT);
-        
         byte[] temp = getValue().fill(getBytes(s), getLength() - 1, Value.LEFT);
-        
         byte[] output = new byte[getLength()];
         
-        if (getSignPosition() == TRAILING) {
-//            s += sign;
+        if (getSignPosition() == SignPosition.TRAILING) {
             System.arraycopy(temp, 0, output, 0, temp.length);
             output[output.length - 1] = (byte) sign;
-        } else if (getSignPosition() == LEADING) {
-//            s = sign + s;
+        } else if (getSignPosition() == SignPosition.LEADING) {
             System.arraycopy(temp, 0, output, 1, temp.length);
             output[0] = (byte) sign;
         } else {
-            throw new RuntimeException(BUG_TEXT);
+            throw new IllegalStateException("undefined sign position");
         }
         
         return output;
     }
 
-    public int digits()
-    {
+    @Override
+    public int digits() {
         return getLength() - 1;
     }
 }

@@ -26,45 +26,14 @@ import net.sf.cb2java.data.DecimalData;
 import net.sf.cb2java.data.IntegerData;
 
 /**
- * class that represents decimal (zoned) data types
+ * class that represents decimal (zoned) data types.
  *
  * @author James Watson
  */
-public class Decimal extends Numeric
-{
-    public Decimal(String name, int level, int occurs, String picture)
-    {
-        super(name, level, occurs, picture);
-    }
-    
-    public Decimal(String name, String picture)
-    {
-        super(name, 0, 1, picture);
-    }
-    
-    public Decimal(String picture)
-    {
-        super("", 0, 1, picture);
-    }
-    
-    public Decimal(String name, int length, int decimalPlaces, boolean signed)
-    {
-        super(name, length, decimalPlaces, signed, null);
-    }
-    
-    public Decimal(int length, int decimalPlaces, boolean signed)
-    {
-        super("", length, decimalPlaces, signed, null);
-    }
-    
-    public Decimal(String name, int length, int decimalPlaces, boolean signed, Position position)
-    {
-        super(name, length, decimalPlaces, signed, position);
-    }
-    
-    public Decimal(int length, int decimalPlaces, boolean signed, Position position)
-    {
-        super("", length, decimalPlaces, signed, position);
+public class Decimal extends SignedNumeric {
+	
+    public Decimal(String name, int level, int occurs, String picture, SignPosition signPosition) {
+        super(name, level, occurs, picture, signPosition);
     }
     
     /**
@@ -75,8 +44,7 @@ public class Decimal extends Numeric
      * @param overpunch the char to overpunch
      * @return the overpunched char
      */
-    private char getChar(boolean positive, char overpunch)
-    {
+    private char getChar(boolean positive, char overpunch) {
         if (!signed()) {
             return overpunch;
         } else if (positive) {
@@ -116,8 +84,7 @@ public class Decimal extends Numeric
      * @param overpunched the char to check
      * @return whether the given overpunched char is positive
      */
-    private boolean isPositive(char overpunched)
-    {
+    private boolean isPositive(char overpunched) {
         if (!signed()) {
             return true;
         } else {
@@ -166,8 +133,7 @@ public class Decimal extends Numeric
      * @param overpunched
      * @return the digit char
      */
-    private char getNumber(char overpunched)
-    {
+    private char getNumber(char overpunched) {
         if (!signed()) {
             return overpunched;
         } else {
@@ -218,24 +184,27 @@ public class Decimal extends Numeric
         throw new IllegalArgumentException("invalid char: " + overpunched);
     }
     
-    public Data parse(byte[] bytes)
-    {
+    @Override
+    public Data parse(byte[] bytes) {
         String input = getString(bytes).trim();
-        String s;
+        String s = input;
         
         if (input.length() < 1) {
             s = null;
-        }else if (getSignPosition() == LEADING) {
-            char c = input.charAt(0); 
-            s = (isPositive(c) ? "" : "-") + getNumber(c) 
-                + (input.length() > 1 ? input.substring(1) : ""); 
-        } else {
-            int last = input.length() - 1; 
-            char c = input.charAt(last); 
-            s = (isPositive(c) ? "" : "-") 
-                + (input.length() > 1 ? input.substring(0, last-1) : "") + getNumber(c);
-        }
-        
+        } else if (signed()) {
+        	if (getSignPosition() == SignPosition.LEADING) {
+	            char c = input.charAt(0); 
+	            s = (isPositive(c) ? "" : "-") + getNumber(c) 
+	                + (input.length() > 1 ? input.substring(1) : ""); 
+	        } else if (getSignPosition() == SignPosition.TRAILING) {
+	            int last = input.length() - 1; 
+	            char c = input.charAt(last); 
+	            s = (isPositive(c) ? "" : "-") 
+	                + (input.length() > 1 ? input.substring(0, last) : "") + getNumber(c);
+	        } else {
+	        	throw new IllegalStateException("undefined sign position");
+	        }
+        }        
         BigInteger big = s == null ? null : new BigInteger(s);
         Data data = create();
         
@@ -255,8 +224,8 @@ public class Decimal extends Numeric
         }
     }
     
-    public byte[] toBytes(Object data)
-    {
+    @Override
+    public byte[] toBytes(Object data) {
         if (data == null) {
             return getValue().fill(getLength());
         } 
@@ -264,7 +233,7 @@ public class Decimal extends Numeric
         BigInteger bigI = getUnscaled(data);
         boolean positive;
         
-        if (ZERO.unscaledValue().compareTo(bigI) > 0) {
+        if (BigDecimal.ZERO.unscaledValue().compareTo(bigI) > 0) {
             bigI = bigI.abs();
             positive = false;
         } else {
@@ -273,27 +242,20 @@ public class Decimal extends Numeric
         
         byte[] output = getValue().fill(getBytes(bigI.toString()), getLength(), Value.LEFT);
         
-        if (getSignPosition() == LEADING) {
+        if (getSignPosition() == SignPosition.LEADING) {
             output[0] = (byte) getChar(positive, (char) output[0]);
-        } else {
+        } else if (getSignPosition() == SignPosition.TRAILING) {
             int last = output.length - 1;
             output[last] = (byte) getChar(positive, (char) output[last]);
+        } else {
+        	throw new IllegalStateException("undefined sign position");
         }
         
         return output;
-        
-//        s = getValue().fillString(s, getLength(), Value.LEFT);
-//        
-//        if (getSignPosition() == LEADING) {
-//            return getBytes(getChar(positive, s.charAt(0)) + s.substring(1));
-//        } else {
-//            int last = s.length() - 1;
-//            return getBytes(s.substring(0, last) + getChar(positive, s.charAt(last)));
-//        }
     }
 
-    public int digits()
-    {
+    @Override
+    public int digits() {
         return getLength();
     }
 }

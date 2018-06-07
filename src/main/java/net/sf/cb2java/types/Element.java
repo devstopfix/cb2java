@@ -27,12 +27,12 @@ import net.sf.cb2java.Value;
 import net.sf.cb2java.data.Data;
 
 /**
- * base class for types
+ * base class for types.
  * 
  * @author James Watson
  */
-public abstract class Element 
-{
+public abstract class Element {
+	
     /** the name of the element from the copybook */
     private final String name;
     /** the level of the element from the copybook */
@@ -42,7 +42,7 @@ public abstract class Element
     /** the absolute position of the where this item starts in data */
     private int position;
     /** the instance that represents the data that defines this element */
-    private Settings settings = Settings.DEFAULT;
+    private Settings settings;
     /** the default value of this element */
     private Value value;
     /** the parent of this element */
@@ -55,8 +55,7 @@ public abstract class Element
      * @param level the level of the element
      * @param occurs how many times the element occurs
      */
-    protected Element(final String name, final int level, final int occurs)
-    {
+    protected Element(final String name, final int level, final int occurs) {
         this.name = name;
         this.level = level;
         this.occurs = occurs;
@@ -69,8 +68,7 @@ public abstract class Element
      * 
      * @return the value set for this element or the default
      */
-    public Value getValue()
-    {
+    public Value getValue() {
         return value;
     }
     
@@ -79,7 +77,7 @@ public abstract class Element
      * 
      * @return the children of this element or null if there are none
      */
-    public abstract List getChildren();
+    public abstract List<Element> getChildren();
     
     /**
      * returns the number of bytes of one instance of this element
@@ -124,8 +122,7 @@ public abstract class Element
      * 
      * @return the name of this element
      */
-    public final String getName()
-    {
+    public final String getName() {
         return name;
     }
     
@@ -134,8 +131,7 @@ public abstract class Element
      * 
      * @return the level of this element
      */
-    public final int getLevel()
-    {
+    public final int getLevel() {
         return level;
     }
     
@@ -144,8 +140,7 @@ public abstract class Element
      * 
      * @return the position of this element
      */
-    public final int getPosition()
-    {
+    public final int getPosition() {
         return position;
     }
     
@@ -154,8 +149,7 @@ public abstract class Element
      * 
      * @return the number of times this item appears in data
      */
-    public int getOccurs()
-    {
+    public final int getOccurs() {
         return occurs;
     }
     
@@ -166,8 +160,7 @@ public abstract class Element
      * 
      * @param value
      */
-    public void setValue(Value value)
-    {
+    public void setValue(Value value) {
         this.value = value;
     }
     
@@ -178,8 +171,7 @@ public abstract class Element
      * @param data the data to write as bytes
      * @throws IOException
      */
-    public final void write(OutputStream stream, Object data) throws IOException
-    {
+    public final void write(OutputStream stream, Object data) throws IOException {
         validate(data);
         stream.write(toBytes(data));
     }
@@ -191,8 +183,7 @@ public abstract class Element
      * @param data the data to convert to a String
      * @return the String value
      */
-    public final String getString(byte[] data)
-    {
+    public final String getString(byte[] data) {
         try {
             return new String(data, getSettings().getEncoding());
         } catch (UnsupportedEncodingException e) {
@@ -206,8 +197,7 @@ public abstract class Element
      * @param s the string to convert
      * @return the bytes for the string
      */
-    public final byte[] getBytes(String s)
-    {
+    public final byte[] getBytes(String s) {
         try {
             return s.getBytes(getSettings().getEncoding());
         } catch (UnsupportedEncodingException e) {
@@ -220,10 +210,7 @@ public abstract class Element
      * 
      * @param settings the new settings
      */
-    public void setSettings(Settings settings)
-    {
-//        if (this.copybook != null) throw new IllegalStateException("copybook already initialized");
-        
+    public void setSettings(Settings settings) {
         this.settings = settings;
     }
 
@@ -232,8 +219,7 @@ public abstract class Element
      * 
      * @return the parent of this element
      */
-    public Group getParent()
-    {
+    public Group getParent(){
         return parent;
     }
     
@@ -242,8 +228,7 @@ public abstract class Element
      * 
      * @param parent the parent for this element
      */
-    public void setParent(Group parent)
-    {
+    public void setParent(Group parent){
         this.parent = parent;
     }
     
@@ -258,13 +243,12 @@ public abstract class Element
         } else if (getParent() != null) {
             return getParent().getSettings();
         } else {
-            return null;
+            return Settings.DEFAULT();
         }
     }
     
     @Override
-    public String toString() 
-    {
+    public String toString() {
         return new String(getSettings().getValues().SPACES.fill(level)) + name + ": '" 
             + this.getClass() + " " + getLength() + "'\n";
     }

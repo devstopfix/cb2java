@@ -7,6 +7,6 @@
             30 ONE             PIC 9(1).
             30 NINE            PIC 9(1).
             30 TWELVE          PIC 9(2).
-            *30 MINUSONE        PIC S9(2).
-            *30 MINUSSIXTYFIVE  PIC S9(3).
-            *30 MINUSEIGHTYTWO  PIC S9(4).
+            30 MINUSONE        PIC S9(2).
+            30 MINUSSIXTYFIVE  PIC S9(3).
+            30 MINUSEIGHTYTWO  PIC S9(4).

@@ -22,28 +22,27 @@ import java.util.Collections;
 import java.util.List;
 import net.sf.cb2java.types.Element;
 
-public abstract class ValueData extends Data
-{    
-    public ValueData(Element definition)
-    {
+public abstract class ValueData extends Data {
+	
+    public ValueData(Element definition) {
         super(definition);
     }
 
-    public boolean isLeaf()
-    {
+    @Override
+    public boolean isLeaf() {
         return true;
     }
     
-    public List getChildren()
-    {
-        return Collections.EMPTY_LIST;
+    @Override
+    public List<Data> getChildren() {
+        return Collections.emptyList();
     }
    
     @Override
     public abstract String toString();
    
-    public String toString(String indent)
-    {
+    @Override
+    public String toString(String indent) {
         return indent + toString();
     }
 }

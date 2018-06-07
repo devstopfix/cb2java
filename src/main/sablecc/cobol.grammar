@@ -1,0 +1,331 @@
+/*************************************************************
+ * This file is part of CB2XML.  
+ * See the file "LICENSE" for copyright information and the
+ * terms and conditions for copying, distribution and
+ * modification of CB2XML.
+ *************************************************************
+ */
+
+Package
+    net.sf.cb2xml.sablecc;
+
+Helpers
+    tab = 9;
+    cr = 13;
+    lf = 10;
+    eol = cr lf | cr | lf;
+    all = [ 0 .. 0xffff ];
+    all_but_eol = [ all - [ cr + lf ] ];
+    digit = [ '0' .. '9' ];
+    letter = [ 'a' .. 'z' ] | [ 'A' .. 'Z' ];   
+
+    a = ['a' + 'A'];
+    b = ['b' + 'B'];
+    c = ['c' + 'C'];
+    d = ['d' + 'D'];
+    e = ['e' + 'E'];
+    f = ['f' + 'F'];
+    g = ['g' + 'G'];
+    h = ['h' + 'H'];
+    i = ['i' + 'I'];
+    j = ['j' + 'J'];
+    k = ['k' + 'K'];
+    l = ['l' + 'L'];
+    m = ['m' + 'M'];
+    n = ['n' + 'N'];
+    o = ['o' + 'O'];
+    p = ['p' + 'P'];
+    q = ['q' + 'Q'];
+    r = ['r' + 'R'];
+    s = ['s' + 'S'];
+    t = ['t' + 'T'];
+    u = ['u' + 'U'];
+    v = ['v' + 'V'];
+    w = ['w' + 'W'];
+    x = ['x' + 'X'];
+    y = ['y' + 'Y'];
+    z = ['z' + 'Z'];
+
+Tokens
+    white_space = ( ' ' | tab | eol )+; 
+    comment = '*' all_but_eol* eol;
+    dot = '.';
+    comma = ',';
+    slash = '/';
+    plus = '+';
+    minus = '-';
+    star = '*';
+    dollar = '$';
+    lparen = '(';
+    rparen = ')';       
+    number88 = '8' '8';  // we need this to identify the 88 levels
+    number_not88 = digit+;
+    alphanumeric_literal = 
+        ''' ( [all - '''] | ''' ''' )* ''' |
+        '"' ( [all - '"'] | '"' '"' )* '"';
+    // unsigned integers will be caught by "number_not88" above; below signed, decimal & scientific
+    numeric_literal = ( '+' | '-' )? digit* ( '.' digit+ ( 'E' ( '+' | '-' )? digit+ )? )?;
+    dot_zee = '.' 'Z'+; // to support character strings like Z(6).ZZZ                   
+    
+    // COBOL KEYWORDS
+    //=========================================================================
+    all = a l l ;
+    are = a r e ;
+    ascending = a s c e n d i n g ;
+    binary = b i n a r y ;
+    blank = b l a n k ;
+    by = b y ;
+    character = c h a r a c t e r ;
+    comp = c o m p | c o m p u t a t i o n a l ;
+    comp1 = c o m p '-' '1' | c o m p u t a t i o n a l '-' '1' ;
+    comp2 = c o m p '-' '2' | c o m p u t a t i o n a l '-' '2' ;
+    comp3 = c o m p '-' '3' | c o m p u t a t i o n a l '-' '3' ;
+    comp4 = c o m p '-' '4' | c o m p u t a t i o n a l '-' '4' ;
+    comp5 = c o m p '-' '5' | c o m p u t a t i o n a l '-' '5' ;
+    date = d a t e ;
+    depending = d e p e n d i n g ;
+    descending = d e s c e n d i n g ;
+    display = d i s p l a y ;
+    display1 = d i s p l a y '-' '1' ;  
+    external = e x t e r n a l ;
+    filler = f i l l e r ;
+    format = f o r m a t ;
+    function_pointer = f u n c t i o n '-' p o i n t e r ;
+    global = g l o b a l ;
+    high_values = h i g h '-' v a l u e | h i g h '-' v a l u e s ;
+    index = i n d e x ;
+    indexed = i n d e x e d ;
+    is = i s ;
+    justified = j u s t | j u s t i f i e d ;
+    key = k e y ;
+    leading = l e a d i n g ;
+    left = l e f t ;
+    low_values = l o w '-' v a l u e | l o w '-' v a l u e s ;
+    national = n a t i o n a l ;
+    native = n a t i v e ;
+    nulls = n u l l | n u l l s ;
+    object = o b j e c t ;    
+    occurs = o c c u r s ;
+    on = o n ;
+    packed_decimal = p a c k e d '-' d e c i m a l ;
+    picture = p i c | p i c t u r e ;
+    pointer = p o i n t e r ;
+    procedure_pointer = p r o c e d u r e '-' p o i n t e r ;
+    quotes = q u o t e | q u o t e s ;    
+    redefines = r e d e f i n e s ;
+    reference = r e f e r e n c e ;
+    renames = r e n a m e s ;
+    right = r i g h t ;
+    separate = s e p a r a t e ;
+    sign = s i g n ;
+    spaces = s p a c e | s p a c e s ; 
+    synchronized = s y n c | s y n c h r o n i z e d ;
+    through = t h r u | t h r o u g h ;
+    times = t i m e s ;
+    to = t o ;
+    trailing = t r a i l i n g ;
+    usage = u s a g e ;
+    value = v a l u e ;
+    values = v a l u e s ;
+    when = w h e n ;
+    zeros = z e r o | z e r o s | z e r o e s ;
+    //=========================================================================
+
+    // as per COBOL spec an identifier must start with a letter
+    // we relax this to allow digits to start an identifier
+    // and at least one letter has to exist within the identifier
+    // some copybooks in the wild are this way 
+    data_name = digit* letter ( letter | digit | '-' )*;            
+    
+    // if any strange (e.g. non ASCII) character is encountered this token matches
+    // and it is ignored gracefully in the Ignored Tokens section
+    unknown = all;  
+
+Ignored Tokens
+    white_space, comment, unknown;
+    
+Productions
+    record_description =
+        group_item dot;
+
+    group_item =
+        {single} elementary_item |
+        {sequence} group_item dot elementary_item;
+                
+    elementary_item = 
+        {item} item |
+        {renames_item} renames_item |
+        {value_item} value_item;
+    
+    item =
+        number_not88
+        data_name_or_filler?
+        redefines_clause?
+        clause_sequence?;
+
+    data_name_or_filler =
+        {data_name} data_name |
+        {filler} filler;
+
+    redefines_clause =
+        redefines data_name;
+
+    clause_sequence =
+        {single} clause |
+        {sequence} clause_sequence clause;      
+        
+    clause =
+        {blank_when_zero_clause} blank_when_zero_clause |
+        {date_format_clause} date_format_clause |
+        {external_clause} external_clause |
+        {global_clause} global_clause |
+        {justified_clause} justified_clause |
+        {occurs_clause} occurs_clause |
+        {picture_clause} picture_clause |
+        {sign_clause} sign_clause |
+        {synchronized_clause} synchronized_clause |
+        {usage_clause} usage_clause |
+        {value_clause} value_clause;
+
+    blank_when_zero_clause =
+        blank when? zeros;  
+
+    date_format_clause =
+        date format is? data_name;
+        
+    external_clause =
+        external;
+    
+    global_clause =
+        global;
+        
+    justified_clause =
+        justified right?;
+
+    occurs_clause =
+        occurs_fixed_or_variable ascending_or_descending_key_phrase* indexed_by_phrase*;
+        
+    occurs_fixed_or_variable =
+        {fixed} occurs number times? |
+        {variable} occurs occurs_to? number times? depending on? data_name;
+        
+    occurs_to =     
+        number to;
+        
+    ascending_or_descending_key_phrase =
+        ascending_or_descending key? is? data_name+;
+        
+    ascending_or_descending =
+        {ascending} ascending |
+        {descending} descending;
+    
+    indexed_by_phrase =
+        indexed by? data_name+;
+                
+    picture_clause =
+        picture is? character_string;
+        
+    sign_clause =
+        sign_is? leading_or_trailing separate_character?;
+    
+    sign_is =
+        sign is?;
+    
+    leading_or_trailing =
+        {leading} leading |
+        {trailing} trailing;
+    
+    separate_character =
+        separate character?;
+        
+    synchronized_clause =
+        synchronized left_or_right?;
+        
+    left_or_right =
+        {left} left |
+        {right} right;
+        
+    usage_clause =
+        usage_is? usage_phrase;
+        
+    usage_is =
+        usage is?;
+    
+    usage_phrase =
+        {binary} binary native? |
+        {comp} comp |
+        {comp1} comp1 native? |
+        {comp2} comp2 native? |
+        {comp3} comp3 |
+        {comp4} comp4 native? |
+        {comp5} comp5 |
+        {display} display native? |
+        {display1} display1 native? |
+        {index} index |
+        {national} national |
+        {object_reference_phrase} object_reference_phrase |
+        {packed_decimal} packed_decimal |
+        {pointer} pointer |
+        {procedure_pointer} procedure_pointer |
+        {function_pointer} function_pointer;
+        
+    object_reference_phrase =
+        object reference data_name?;
+        
+    renames_item =
+        number_not88 [rename_to]:data_name renames [rename_from]:data_name through_phrase?;
+        
+    through_phrase =
+        through data_name;
+        
+    value_clause =
+        value is? all? literal;
+        
+    value_item = 
+        number88 data_name value_or_values literal_sequence;    
+        
+    value_or_values =
+        {value} value is? |
+        {values} values are?;
+        
+    literal_sequence =
+        {single} all? literal |
+        {sequence} literal_sequence comma? literal |
+        {through_single} [from]:literal through [to]:literal |
+        {through_sequence} literal_sequence comma? [from]:literal through [to]:literal;
+        
+    literal =
+        {zeros} zeros |
+        {spaces} spaces |
+        {high_values} high_values |
+        {low_values} low_values |
+        {quotes} quotes |
+        {nulls} nulls |
+        {number} number |
+        {numeric_literal} numeric_literal |
+        {alphanumeric_literal} alphanumeric_literal;                                        
+        
+    character_string =
+        {single} character_substring |
+        {sequence} character_string character_substring;
+        
+    character_substring =
+        {data_name} data_name | // S P A B E G N V X Z CR DB     
+        {plus} plus |
+        {minus} minus |
+        {star} star |
+        {slash} slash |
+        {dollar} dollar |
+        {comma} comma |
+        {number} number_not88 | // 0 00 9 99
+        {numeric_literal} numeric_literal | // .99 9.99 
+        {bracketed_number} bracketed_number |
+        {dot_zee} dot_zee;
+        
+    bracketed_number = 
+        lparen number rparen;
+        
+    number =
+        {number_not88} number_not88 |
+        {number88} number88;
+                

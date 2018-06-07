@@ -28,54 +28,49 @@ import net.sf.cb2java.types.Numeric;
  * 
  * @author James Watson
  */
-public class IntegerData extends NumericData
-{
-    public BigInteger data;
+public class IntegerData extends NumericData {
+	
+    private BigInteger data;
     
-    public IntegerData(Numeric definition)
-    {
+    public IntegerData(Numeric definition) {
         super(definition);
     }
     
-    public int getInt()
-    {
+    public int getInt() {
         return data == null ? 0 : data.intValue();
     }
     
-    public long getLong()
-    {
+    public long getLong() {
         return data == null ? 0 : data.longValue();
     }
     
-    public BigInteger getBigInteger()
-    {
-        return data == null ? new BigInteger("0") : data;
+    public BigInteger getBigInteger() {
+        return data == null ? BigInteger.ZERO : data;
     }
     
-    public void setValue(long data)
-    {
+    @Override
+    protected void setValueImpl(Object data) {
+        setValue(((BigDecimal) data).toBigInteger(), true);
+    }
+    
+    public void setValue(BigInteger data) {
+    	setValue(data, true);
+    }
+    
+    public void setValue(long data, boolean validate) {
         BigInteger temp = BigInteger.valueOf(data);
-        setValue(temp, true);
+        setValue(temp, validate);
     }
     
-    protected void setValueImpl(Object data)
-    {
-        setValue(((BigDecimal) data).toBigInteger(), false);
-    }
-    
-    public void setValue(BigInteger data)
-    {
-        setValue(data, true);
-    }
-
-    public void setValue(BigInteger data, boolean validate)
-    {
-        if (validate) validate(data);
+    public void setValue(BigInteger data, boolean validate) {
+        if (validate) {
+            validate(data);
+        }
         this.data = data;
     }
     
-    public Object getValue()
-    {
+    @Override
+    public Object getValue() {
         return getBigInteger();
     }
 

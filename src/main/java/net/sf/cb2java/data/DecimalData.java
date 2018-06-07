@@ -21,34 +21,34 @@ package net.sf.cb2java.data;
 import java.math.BigDecimal;
 import net.sf.cb2java.types.Numeric;
 
-public class DecimalData extends NumericData
-{
-    private int roundingMode = BigDecimal.ROUND_HALF_UP;
+public class DecimalData extends NumericData {
+	
     private BigDecimal data;
+    private int roundingMode = BigDecimal.ROUND_HALF_UP;
     
-    public DecimalData(final Numeric definition)
-    {
+    public DecimalData(final Numeric definition) {
         super(definition);
     }
     
-    public void setRoundingMode(int mode)
-    {
+    public void setRoundingMode(int mode) {
         this.roundingMode = mode;
     }
     
-    public float getFloat()
-    {
+    public float getFloat() {
         return data == null ? 0 : data.floatValue();
     }
     
-    public double getDouble()
-    {
+    public double getDouble() {
         return data == null ? 0 : data.doubleValue();
     }
     
-    public BigDecimal getBigDecimal()
-    {
-        return data;// == null ? new BigDecimal(0) : data;
+    public BigDecimal getBigDecimal() {
+        return data;
+    }
+    
+    @Override
+    protected void setValueImpl(Object data) {
+        setValue((BigDecimal) data, true);
     }
     
     /**
@@ -58,32 +58,23 @@ public class DecimalData extends NumericData
      * 
      * @param data the value to set this Object to
      */
-    public void setValue(double data)
-    {
-        BigDecimal temp = new BigDecimal(data);
-        temp = temp.setScale(((Numeric) getDefinition()).decimalPlaces(), roundingMode);
+    public void setValue(double data, boolean validate) {
+        BigDecimal value = new BigDecimal(data);
+        int decPlaces = ((Numeric) getDefinition()).decimalPlaces();
+        value = value.setScale(decPlaces, roundingMode);
         
-        setValue(temp, true);
+        setValue(value, validate);
     }
     
-    protected void setValueImpl(Object data)
-    {   
-        setValue((BigDecimal) data, false);
-    }
-    
-    public void setValue(BigDecimal data)
-    {   
-        setValue(data, true);
-    }
-    
-    public void setValue(BigDecimal data, boolean validate)
-    {   
-        if (validate) validate(data);
+    public void setValue(BigDecimal data, boolean validate) {
+        if (validate) {
+            validate(data);
+        }
         this.data = data;
     }
     
-    public Object getValue()
-    {
+    @Override
+    public Object getValue() {
         return getBigDecimal();
     }
 
@@ -94,7 +85,7 @@ public class DecimalData extends NumericData
      * @author github.com/devstopfix/cb2java
      * @return the copybook data as Plain Java Objects
      */
-   @Override
+    @Override
     protected Object toPOJO() {
         return this.getBigDecimal();
     }

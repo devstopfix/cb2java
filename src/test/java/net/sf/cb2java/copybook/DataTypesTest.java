@@ -26,7 +26,7 @@ public class DataTypesTest extends TestCase {
      */
     public void testWeCanParseAlpha() throws FileNotFoundException, IOException {
         Copybook copybook = CopybookParser.parse("TYPES", new FileInputStream(new File("./src/test/resources/types.copybook")));
-        assertEquals(16, copybook.getLength());
+        assertEquals(25, copybook.getLength());
         List<Record> records = copybook.parseData(new FileInputStream(new File("./src/test/resources/types.txt")));
         Record record = records.get(0);
         assertEquals("!", record.getChild("TYPES").getChildren().get(0).getChildren().get(0).toString());
@@ -48,9 +48,9 @@ public class DataTypesTest extends TestCase {
         List<Record> records = copybook.parseData(new FileInputStream(new File("./src/test/resources/types.txt")));
         Record record = records.get(0);
         GroupData integers = (GroupData) record.getChild("TYPES").getChildren().get(1);
-        // todo assertEquals(BigInteger.valueOf(-1),  integers.getChild("MINUSONE").getValue());
-        // todo assertEquals(BigInteger.valueOf(-65), integers.getChild("MINUSSIXTYFIVE").getValue());
-        // todo assertEquals(BigInteger.valueOf(-82), integers.getChild("EIGHTYTWO").getValue());
+        assertEquals(BigInteger.valueOf(-1),  integers.getChild("MINUSONE").getValue());
+        assertEquals(BigInteger.valueOf(-65), integers.getChild("MINUSSIXTYFIVE").getValue());
+        assertEquals(BigInteger.valueOf(-82), integers.getChild("MINUSEIGHTYTWO").getValue());
     }
 
 }

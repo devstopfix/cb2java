@@ -27,74 +27,39 @@ import net.sf.cb2java.data.DecimalData;
 import net.sf.cb2java.data.IntegerData;
 
 /**
- * Base type for numeric elements
+ * Base type for numeric elements.
  *
  * @author Matt Watson
  */
-public abstract class Numeric extends Leaf
-{
-    public static final BigDecimal ZERO = new BigDecimal("0");
-    public static final Position LEADING = new Position();
-    public static final Position TRAILING = new Position();
- 
-    private Position position = getSettings().getSignPosition();
+public abstract class Numeric extends Leaf {
+	
     private final int length;
     private final int decimalPlaces;
     private final boolean signed;
+    private final String picture;
     
-    protected Numeric(String name, int level, int occurs, final String picture)
-    {
+    protected Numeric(String name, int level, int occurs, final String picture) {
         super(name, level, occurs);
-        
+        this.picture = picture;
         this.length = getLength(picture);
-        this.decimalPlaces = getScale(picture, length);
+        this.decimalPlaces = getScale(picture);
         this.signed = isSigned(picture);
     }
     
-    protected Numeric(String name, int level, int occurs, final int length, final int decimalPlaces, final boolean signed)
-    {
-        super(name, level, occurs);
-        
-        this.length = length;
-        this.decimalPlaces = decimalPlaces;
-        this.signed = signed;
-    }
-    
-    protected Numeric(String name, int length, int decimalPlaces, boolean signed, Position position)
-    {
-        this(name, 0, 1, length, decimalPlaces, signed);
-        if (position != null) setSignPosition(position);
-    }
-    
-//    protected Numeric(int length, int decimalPlaces, boolean signed, Position position)
-//    {
-//        this("", length, decimalPlaces, signed, position);
-//        if (position != null) setSignPosition(position);
-//    }
-    
-    public void setSignPosition(Position position)
-    {
-        this.position = position;
-    }
-    
-    public Position getSignPosition()
-    {
-        return position;
-    }
-    
-    public static boolean isSigned(String picture)
-    {
+    private static boolean isSigned(String picture) {
         return picture.charAt(0) == 'S';
     }
     
-    public static int getLength(String pic)
-    {
+    protected static int getLength(String pic) {
         int length = 0;
         
         for (int i = 0; i < pic.length(); i++) {
             char c = pic.charAt(i);
-            
-            if (c == '9' && (i == pic.length() - 1 || pic.charAt(i + 1) != '(')) {
+            /**
+             * I don't remember why i added 'S' to length calculation...
+             * but this breaks tests :(
+             */
+            if (/*c == 'S' ||*/ c == '9' && (i == pic.length() - 1 || pic.charAt(i + 1) != '(')) {
                 length++;
             } else if (c == '(') {
                 int pos = pic.indexOf(')', i);
@@ -107,70 +72,48 @@ public abstract class Numeric extends Leaf
         return length;
     }
     
-    public static int getScale(String pic, int length)
-    {
-        int position = 0;
-        pic = pic.toUpperCase();
-        
-        for (int i = 0; i < pic.length(); i++) {
-            char c = pic.charAt(i);
-            
-            if (c == '(') {
-                int pos = pic.indexOf(')', i);
-                int times = Integer.parseInt(pic.substring(i + 1, pos));
-                i = pos;
-                position += times;
-            } else if (c == 'V') {
-                return length - position;
-            }
-        }
-        
-        return 0;
+    protected static int getScale(String pic) {
+    	int vPos = pic.indexOf("V");
+    	if (vPos < 0) {
+    		return 0;
+    	} else {
+    		return getLength(pic.substring(vPos));
+    	}
     }
     
-    public final boolean signed()
-    {
+    protected final boolean signed() {
         return signed;
     }
     
     public abstract int digits();
-//    {
-//        return length();
-//    }
     
-    public int getLength()
-    {
+    @Override
+    public int getLength() {
         return length;
     }
     
-    public int decimalPlaces()
-    {
+    public int decimalPlaces() {
         return decimalPlaces;
     }
     
-    public DecimalFormat getFormatObject()
-    {
+    public DecimalFormat getFormatObject() {
         StringBuffer buffer = new StringBuffer("#");
                 
         for (int i = 0; i < digits(); i++) {
             if (i + decimalPlaces() == digits()) {
                 buffer.append('.');
             }
-            
             buffer.append('0');
         }
         
-        if (decimalPlaces() < 1) buffer.append('.');
+        if (decimalPlaces() < 1) {
+        	buffer.append('.');
+        }
         
         buffer.append('#');
                 
         return new DecimalFormat(buffer.toString());
     }
-    
-//    public void validate(Object data)
-//    {
-//        validate(data, length());
-//    }
     
     /**
      * validates the data with the given decimal (printed) length
@@ -180,19 +123,14 @@ public abstract class Numeric extends Leaf
      * 
      * @param data
      */
-    public void validate(Object data)//, int length)
-    {
-        if (data == null) return;
-        
-        BigDecimal bigD;
-        
-        if (data instanceof BigInteger) {
-            bigD = new BigDecimal((BigInteger) data);
-        } else {
-            bigD = (BigDecimal) data;
+    @Override
+    public void validate(Object data) {
+        if (data == null) {
+        	return;
         }
         
-        boolean negative = ZERO.compareTo(bigD) > 0;
+        BigDecimal bigD = (data instanceof BigInteger) ? new BigDecimal((BigInteger) data) : (BigDecimal) data;
+        boolean negative = BigDecimal.ZERO.compareTo(bigD) > 0;
         
         if (negative && !signed()) {
             throw (IllegalArgumentException) createEx(bigD, getName() 
@@ -201,18 +139,17 @@ public abstract class Numeric extends Leaf
         
         int scale = bigD.scale();
         
-        if (decimalPlaces() > 0) {
-            if (scale > decimalPlaces()) {
-                throw (IllegalArgumentException) createEx(bigD, "must have " 
-                    + decimalPlaces() + " decimal places").fillInStackTrace();
-            }
+        if (decimalPlaces() > 0 && scale > decimalPlaces()) {
+            throw (IllegalArgumentException) createEx(bigD, "must have " 
+                + decimalPlaces() + " decimal places").fillInStackTrace();
         }
         
         bigD = bigD.setScale(decimalPlaces());
-            
         String s = bigD.unscaledValue().toString();
         
-        if (negative) s = s.substring(1);
+        if (negative) {
+        	s = s.substring(1);
+        }
             
         if (s.length() > digits()) {
             throw (IllegalArgumentException) createEx(bigD, "must be no longer than " 
@@ -221,13 +158,12 @@ public abstract class Numeric extends Leaf
     }
     
     @Override
-    public Value getValue()
-    {
-        return super.getValue() == null ? getSettings().getValues().ZEROS : super.getValue();
+    public Value getValue() {
+        Value result = super.getValue();
+        return result == null ? getSettings().getValues().ZEROES : result;
     }
     
-    protected BigInteger getUnscaled(Object data)
-    {
+    protected BigInteger getUnscaled(Object data) {
         if (data instanceof BigInteger) {
             return (BigInteger) data;
         } else {
@@ -241,28 +177,22 @@ public abstract class Numeric extends Leaf
         }
     }
     
-    public Data create()
-    {
-        if (decimalPlaces() > 0) {
-            return new DecimalData(this);
-        } else {
-            return new IntegerData(this);
-        }
+    @Override
+    public Data create() {
+    	return (decimalPlaces() > 0) ? new DecimalData(this) : new IntegerData(this);
     }
     
-    public IllegalArgumentException createEx(BigDecimal data, String reason)
-    {
+    private IllegalArgumentException createEx(BigDecimal data, String reason) {
         return createEx(data, reason, null);
     }
     
-    public IllegalArgumentException createEx(BigDecimal data, String reason, Throwable cause)
-    {
+    private IllegalArgumentException createEx(BigDecimal data, String reason, Throwable cause) {
         return new IllegalArgumentException(data + " is not valid for " + getName() + ". " + reason 
             + (cause == null ? "" : " " + cause.getMessage()));
     }
     
-    public static class Position
-    {
-        private Position(){}
-    }
+	public String getPicture() {
+		return picture;
+	}
+
 }

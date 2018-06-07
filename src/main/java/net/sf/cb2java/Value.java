@@ -28,16 +28,16 @@ public abstract class Value
     public static final Side LEFT = new Side();
     public static final Side RIGHT = new Side();
     
-    private final String encoding;
+    private final Values values;
     
-    public Value(String encoding)
+    public Value(Values values)
     {
-        this.encoding = encoding;
+        this.values = values;
     }
     
     public String getEncoding()
     {
-        return encoding;
+        return values.getEncoding();
     }
     
     public byte[] get(int length)

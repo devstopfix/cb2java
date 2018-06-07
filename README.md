@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/johnhearn/cb2java.svg?branch=master)](https://travis-ci.org/johnhearn/cb2java)
+
 The CB2Java project's goal is to simplify the lives of developers charged 
 with writing Java applications that communicate
 with COBOL applications. The main motivation for writing this library was
@@ -59,12 +61,12 @@ Include the JAR file in your Java project pom.xml:
     <dependency>
         <groupId>net.sf.cb2java</groupId>
         <artifactId>cb2java</artifactId>
-        <version>5.3</version>
+        <version>5.4.0</version>
     </dependency>
 
 or your [Leiningen](https://github.com/technomancy/leiningen) project.clj:
 
-    [net.sf.cb2java/cb2java "5.3"]
+    [net.sf.cb2java/cb2java "5.4.0"]
 
 
 Licence

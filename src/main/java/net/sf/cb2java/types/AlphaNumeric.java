@@ -22,13 +22,12 @@ import java.util.regex.Pattern;
 import net.sf.cb2java.Value;
 
 /** 
- * Class used to represent alpha and alphanumeric
- * data types
+ * Class used to represent alpha and alphanumeric data types.
  * 
  * @author James Watson
  */
-public class AlphaNumeric extends Characters
-{
+public class AlphaNumeric extends Characters {
+	
     /** the original pattern used for debugging */
     private final String originalPattern;
     /** the regex pattern for validation */
@@ -36,33 +35,22 @@ public class AlphaNumeric extends Characters
     /** the byte length of this element */
     private final int length;
     
-    public AlphaNumeric(String name, int level, int occurs, String pattern)
-    {
+    public AlphaNumeric(String name, int level, int occurs, String pattern) {
         super(name, 0, level, occurs);
         
         this.originalPattern = pattern;
         pattern = pattern.toUpperCase();
-        
         StringBuffer buffer = new StringBuffer();
-        
         length = parsePattern(pattern, buffer);
-        
         this.pattern = Pattern.compile(buffer.toString());
     }
     
-    public AlphaNumeric(String pattern)
-    {
-        this("", 0, 1, pattern);
-    }
-    
     @Override
-    public int getLength()
-    {
+    public int getLength() {
         return length;
     }
     
-    private static int parsePattern(String pattern, StringBuffer buffer)
-    {
+    private static int parsePattern(String pattern, StringBuffer buffer) {
         boolean open = false;
         int length = 0;
         
@@ -83,13 +71,14 @@ public class AlphaNumeric extends Characters
             }
         }
         
-        if (open) length++;
+        if (open) {
+        	length++;
+        }
         
         return length;
     }
     
-    private static String forChar(char c)
-    {
+    private static String forChar(char c) {
         switch (c) {
         case 'A':
             return "[a-zA-Z\u0000 ]";
@@ -102,26 +91,18 @@ public class AlphaNumeric extends Characters
         }
     }
     
-    /**
-     * returns the pattern used to validate the element
-     * 
-     * @return the pattern used to validate the element
-     */
-    public Pattern getPattern()
-    {
-        return pattern;
-    }
-    
     @Override
-    public void validate(Object data)
-    {
-        if (data == null) return;
+    public void validate(Object data) {
+        if (data == null) {
+        	return;
+        }
         
-        String s = (String) data;
+        String value = (String)data;
+        int len = Math.max(value.length(), this.getLength());
+        String filledValue = this.getValue().fillString(value, len, Value.RIGHT);
         
-        if (!pattern.matcher(getValue().fillString(s, getLength(), Value.RIGHT)).matches()) {
-            System.out.print(pattern.toString());
-            throw new IllegalArgumentException(data + " does not match pattern '" + originalPattern
+        if (!pattern.matcher(filledValue).matches()) {
+            throw new IllegalArgumentException("'" + value + "' does not match pattern '" + originalPattern
                 + "' specified for " + getName());
         }
     }

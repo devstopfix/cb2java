@@ -25,59 +25,48 @@ import net.sf.cb2java.types.Characters;
  * 
  * @author James Watson
  */
-public class CharData extends ValueData
-{
-//    private final Characters definition;
+public class CharData extends ValueData {
+
     private String data;
     
-    public CharData(final Characters definition)
-    {
+    public CharData(final Characters definition) {
         super(definition);
-//        this.definition = definition;
     }
     
     /**
-     * TODO - make this a rightTrim()
-     * 
      * @return the trimmed String
      */
-    public String getString()
-    {
-        return data == null ? "" : data.trim();
+    public String getString() {
+        return data == null ? "" : trimRight(data);
     }
     
-    public Object getValue()
-    {
+    @Override
+    public Object getValue() {
         return getString();
     }
     
-    protected void setValueImpl(Object data)
-    {
-        setValue((String) data, false);
+    @Override
+    protected void setValueImpl(Object data) {
+        setValue((String) data, true);
     }
     
     /**
      * sets the data as a String
      * @param data
      */
-//    public void setValue(String data)
-//    {
-//        setValue(data, true);
-//    }
-    
-    public void setValue(String data, boolean validate)
-    {
-        if (validate) validate(data);
+    public void setValue(String data, boolean validate) {
+        if (validate) {
+            validate(data);
+        }
         this.data = data;
     }
     
-    public String toString()
-    {
+    public String toString() {
         return getString();
     }
 
-    public Object translate(String data)
-    {
+    @Override
+    public Object translate(String data) {
         return data;
     }
 
@@ -90,7 +79,14 @@ public class CharData extends ValueData
      */
     @Override
     protected Object toPOJO() {
-        // todo make this a right-trim
         return this.getString();
+    }
+
+    private static String trimRight(String s) {
+        int i = s.length()-1;
+        while (i >= 0 && Character.isWhitespace(s.charAt(i))) {
+            i--;
+        }
+        return s.substring(0,i+1);
     }
 }

@@ -36,8 +36,8 @@ import net.sf.cb2java.types.Floating;
  * 
  * @author James Watson
  */
-public class FloatingData extends ValueData
-{
+public class FloatingData extends ValueData {
+	
     /** All floats should be representable as BigDecimals */
     private BigDecimal data;
     
@@ -47,39 +47,31 @@ public class FloatingData extends ValueData
      * @param definition the underlying definition for the
      * type in the copybook definition
      */
-    public FloatingData(final Floating definition)
-    {
+    public FloatingData(final Floating definition) {
         super(definition);
     }
 
     /**
      * gets the big decimal representation of the value
      */
-    public BigDecimal getBigDecimal()
-    {
-        return data == null ? new BigDecimal(0) : data;
+    public BigDecimal getBigDecimal() {
+        return data == null ? BigDecimal.ZERO : data;
     }
     
     @Override
-    public void setValueImpl(Object data)
-    {
-        setValue((BigDecimal) data, false);
+    public void setValueImpl(Object data) {
+        setValue((BigDecimal) data, true);
     }
 
-    public void setValue(BigDecimal data)
-    {
-        setValue(data, true);
-    }
-    
-    private void setValue(BigDecimal data, boolean validate)
-    {   
-        if (validate) validate(data);
+    public void setValue(BigDecimal data, boolean validate) { 
+        if (validate) {
+            validate(data);
+        }
         this.data = data;
     }
     
     @Override
-    public String toString()
-    {
+    public String toString() {
         return getValue().toString();
     }
 
@@ -87,30 +79,26 @@ public class FloatingData extends ValueData
      * returns the internal data as a BigDecimal
      */
     @Override
-    public Object getValue()
-    {
+    public Object getValue() {
         return getBigDecimal();
     }
     
     /**
      * returns the internal data as a BigDecimal
      */
-    public float getFloat()
-    {
+    public float getFloat() {
         return getBigDecimal().floatValue();
     }
     
     /**
      * returns the internal data as a BigDecimal
      */
-    public double getDouble()
-    {
+    public double getDouble() {
         return getBigDecimal().doubleValue();
     }
 
     @Override
-    public Object translate(String data)
-    {
+    public Object translate(String data) {
         return new BigDecimal(data);
     }
 

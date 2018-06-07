@@ -21,20 +21,18 @@ package net.sf.cb2java.data;
 import java.math.BigDecimal;
 import net.sf.cb2java.types.Numeric;
 
-public abstract class NumericData extends ValueData
-{
-    protected NumericData(final Numeric definition)
-    {
+public abstract class NumericData extends ValueData {
+	
+    protected NumericData(final Numeric definition) {
         super(definition);
     }
     
-    public String toString()
-    {
+    @Override
+    public String toString() {
         return ((Numeric) getDefinition()).getFormatObject().format(getValue());
     }
     
-    public Object translate(String data)
-    {
+    public Object translate(String data) {
         return new BigDecimal(data);
     }
 }

@@ -27,22 +27,20 @@ import net.sf.cb2java.data.Data;
 import net.sf.cb2java.data.GroupData;
 
 /**
- * Type used to represent an element with child elements
+ * Type used to represent an element with child elements.
  */
-public class Group extends Element
-{
+public class Group extends Element {
+	
     /** the list of children */
-    private final List<Element> children = new ArrayList();
+    private final List<Element> children = new ArrayList<Element>();
     /** the wrapper list exposed through getChildren() */
     private final List<Element> wrapper = Collections.unmodifiableList(children);
     
-    public Group(final String name, final int level, final int occurs)
-    {
+    public Group(final String name, final int level, final int occurs) {
         super(name, level, occurs);
     }
     
-    public void addChild(Element element)
-    {
+    public void addChild(Element element) {
         children.add(element);
         element.setParent(this);
     }
@@ -51,17 +49,15 @@ public class Group extends Element
      * returns an immutable list of the children in this group.
      */
     @Override
-    public List<Element> getChildren()
-    {
+    public List<Element> getChildren() {
         return wrapper;
     }
 
     @Override
-    public int getLength()
-    {
+    public int getLength() {
         int length = 0;
         
-        for (Iterator i = children.iterator(); i.hasNext();) {
+        for (Iterator<Element> i = children.iterator(); i.hasNext();) {
             Element element = (Element) i.next();
             for (int j = 0; j < element.getOccurs(); j++) {
                 length += element.getLength();
@@ -72,53 +68,38 @@ public class Group extends Element
     }
     
     @Override
-    public String toString()
-    {
+    public String toString() {
         StringBuffer buffer = new StringBuffer();
-        
         buffer.append(super.toString());
-        
-        for (Iterator i = children.iterator(); i.hasNext();) {
+        for (Iterator<Element> i = children.iterator(); i.hasNext();) {
             buffer.append(i.next());
         }
-        
         return buffer.toString();
     }
 
-    public Data create()
-    {
+    @Override
+    public Data create() {
         ArrayList<Data> dataChildren = new ArrayList<Data>();
-        
-        for (Iterator i = children.iterator(); i.hasNext();) {
+        for (Iterator<Element> i = children.iterator(); i.hasNext();) {
             Element element = (Element) i.next();
             for (int j = 0; j < element.getOccurs(); j++) {
                 dataChildren.add(element.create());
             }
         }
-        
         return new GroupData(this, dataChildren);
     }
     
-    public Data parse(final byte[] bytes)
-    {
-        ArrayList dataChildren = new ArrayList();
+    @Override
+    public Data parse(final byte[] bytes) {
+        ArrayList<Data> dataChildren = new ArrayList<Data>();
         
         int pos = 0;
         
-        for (Iterator i = children.iterator(); i.hasNext();) {
+        for (Iterator<Element> i = children.iterator(); i.hasNext();) {
             final Element element = (Element) i.next();
             for (int j = 0; j < element.getOccurs(); j++) {
-//                final int p = pos;
                 final int end = pos + element.getLength();
-    //            System.out.println(pos + " " + end + " " + input.length());
                 dataChildren.add(element.parse(sub(bytes, pos, end)));
-//                dataChildren.add(new DataHolder() {
-//                    public Data evaluate()
-//                    {
-//                       return element.parse(sub(bytes, p, end));
-//                    }
-//                });
-                
                 pos = end;
             }
         }
@@ -126,36 +107,29 @@ public class Group extends Element
         return new GroupData(this, dataChildren);
     }
 
-    private byte[] sub(byte[] in, int start, int end)
-    {
+    private byte[] sub(byte[] in, int start, int end) {
         byte[] out = new byte[end - start];
-        
-//        System.out.println("sub: " + in.length + ", " + start + ", " + end);
-        
         System.arraycopy(in, start, out, 0, out.length);
-        
         return out;
     }
     
-    public byte[] toBytes(Object data)
-    {
+    @Override
+    public byte[] toBytes(Object data) {
         throw new IllegalArgumentException("cannot read bytes from a group");
     }
 
-    public void validate(Object data)
-    {
+    @Override
+    public void validate(Object data) {
         throw new IllegalArgumentException("groups do not accept data");
     }
 
     @Override
-    public void setValue(Value value)
-    {
+    public void setValue(Value value) {
         throw new RuntimeException("groups cannot have a value");
     }
     
     @Override
-    public Value getValue()
-    {
+    public Value getValue() {
         throw new RuntimeException("groups cannot have a value");
     }
 }

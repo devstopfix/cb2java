@@ -31,7 +31,6 @@ public class CopybooksTest extends TestCase {
      */
     public void testReadCopybooks_FileArr() throws Exception {
         Map<String, Copybook> copybooks = readCopybooks(new File("./target/test-classes/").listFiles(new FilenameFilter() {
-            @Override
             public boolean accept(File file, String filename) {
                 return filename.endsWith(".copybook");
             }

@@ -28,44 +28,21 @@ import java.util.List;
 import java.util.Map;
 import net.sf.cb2java.types.Group;
 
-public class GroupData extends Data
-{
+public class GroupData extends Data {
+	
     protected final Group definition;
     protected final List<Data> children;
-    private final List<Data> wrapper;
+    private final List<Data> childrenWrapper;
     
-    public GroupData(final Group definition, final List<Data> children)
-    {
+    public GroupData(final Group definition, final List<Data> children) {
         super(definition);
         this.definition = definition;
         this.children = children;
-        wrapper = Collections.unmodifiableList(children);
+        this.childrenWrapper = Collections.unmodifiableList(children);
     }
     
-//    private class Wrapper extends AbstractList
-//    {
-//        private Object data;
-//        
-//        public Object get(int index)
-//        {
-//            if (data == null) {
-//                DataHolder holder = (DataHolder) children.get(index);
-//                
-//                data = holder.evaluate();
-//            }
-//            
-//            return data;
-//        }
-//
-//        public int size()
-//        {
-//            return children.size();
-//        }
-//    }
-    
     @Override
-    public boolean isLeaf()
-    {
+    public boolean isLeaf() {
         return false;
     }
     
@@ -73,9 +50,8 @@ public class GroupData extends Data
      * returns an immutable collection of children
      */
     @Override
-    public List<Data> getChildren()
-    {
-        return wrapper;
+    public List<Data> getChildren() {
+        return childrenWrapper;
     }
     
     /**
@@ -86,32 +62,29 @@ public class GroupData extends Data
      * @return the first child with the given name
      * @throws IllegalArgumentException if no child is found
      */
-    public Data getChild(String name)
-    {
-        for (Iterator i = wrapper.iterator(); i.hasNext();)
-        {
+    public Data getChild(String name) {
+        for (Iterator<Data> i = childrenWrapper.iterator(); i.hasNext();) {
             Data child = (Data) i.next();
-            
-            if (child.getName().equalsIgnoreCase(name)) return child;
+            if (child.getName().equalsIgnoreCase(name)) {
+            	return child;
+            }
         }
         
         return null;
     }
     
     @Override
-    public String toString()
-    {
+    public String toString() {
         return toString("");
     }
     
     @Override
-    public String toString(String indent)
-    {
+    public String toString(String indent) {
         StringBuffer buffer = new StringBuffer(indent);
         
         buffer.append(getName());
         
-        for (Iterator i = wrapper.iterator(); i.hasNext();) {
+        for (Iterator<Data> i = childrenWrapper.iterator(); i.hasNext();) {
             buffer.append('\n');
             buffer.append(((Data) i.next()).toString(indent + INDENT));
         }
@@ -120,9 +93,8 @@ public class GroupData extends Data
     }
     
     @Override
-    public void write(OutputStream stream) throws IOException
-    {
-        for (Iterator i = wrapper.iterator(); i.hasNext();) {
+    public void write(OutputStream stream) throws IOException {
+        for (Iterator<Data> i = childrenWrapper.iterator(); i.hasNext();) {
             Data child = (Data) i.next();
             child.write(stream);
         }
@@ -132,14 +104,12 @@ public class GroupData extends Data
      * returns the children of this item
      */
     @Override
-    public Object getValue()
-    {
+    public Object getValue() {
         return getChildren();
     }
 
     @Override
-    public Object translate(String data)
-    {
+    public Object translate(String data) {
         throw new UnsupportedOperationException("cannot convert string to group");
     }
     
@@ -147,8 +117,7 @@ public class GroupData extends Data
      * not supported
      */
     @Override
-    protected void setValueImpl(Object data)
-    {
+    protected void setValueImpl(Object data) {
         throw new IllegalArgumentException("operation not yet supported for groups");
     }
 
@@ -166,15 +135,15 @@ public class GroupData extends Data
      */
     @Override
     protected Object toPOJO() {
-        Map<String, Object> group = new LinkedHashMap<String, Object>(this.wrapper.size());
-        Iterator<Data> groupIterator = wrapper.iterator();
+        Map<String, Object> group = new LinkedHashMap<String, Object>(this.childrenWrapper.size());
+        Iterator<Data> groupIterator = childrenWrapper.iterator();
         while (groupIterator.hasNext()) {
             Data child = groupIterator.next();
             int occurs = child.getDefinition().getOccurs();
             if (occurs > 1) {
-                List childOccurs = new ArrayList(occurs);
+                List<Object> childOccurs = new ArrayList<Object>(occurs);
                 childOccurs.add(child.toPOJO());
-                for(int i=1; i<occurs;i++) {
+                for (int i=1; i<occurs;i++) {
                     childOccurs.add(groupIterator.next().toPOJO());
                 }
                 group.put(child.getName(), Collections.unmodifiableList(childOccurs));

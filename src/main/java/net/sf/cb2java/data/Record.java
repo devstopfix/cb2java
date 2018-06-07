@@ -21,10 +21,9 @@ package net.sf.cb2java.data;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class Record extends GroupData
-{
-    public Record(String name, GroupData data)
-    {
+public class Record extends GroupData {
+	
+    public Record(GroupData data) {
         super(data.definition, data.children);
     }
     
@@ -45,7 +44,7 @@ public class Record extends GroupData
      */
     public Map<String,Object> toMap() {
         Map<String, Object> group = new LinkedHashMap<String, Object>(getChildren().size());
-        for(Data child: getChildren()) {
+        for (Data child: getChildren()) {
             group.put(child.getName(), child.toPOJO());
         }
         return group;
