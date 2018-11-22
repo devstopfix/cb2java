@@ -20,10 +20,13 @@ package net.sf.cb2java.copybook;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import net.sf.cb2java.Settings;
 import net.sf.cb2java.Values;
 import net.sf.cb2java.data.GroupData;
@@ -263,4 +266,26 @@ public class Copybook extends Group implements Settings
             return bytes;
         }
     }
+
+    
+	private static HashMap<Class<?>, HashMap<String, Field>> pojoTypeMaps = new HashMap<Class<?>, HashMap<String,Field>>();
+	public static HashMap<String, Field> mapPojo(Class<?> clazz) {
+		if(pojoTypeMaps.containsKey(clazz))return pojoTypeMaps.get(clazz); 
+
+		HashMap<String, Field> map = new HashMap<String, Field>();
+		ArrayList<Field> fields = new ArrayList<Field>(Arrays.asList(clazz.getFields()));
+		fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
+		
+		for (Field field : fields) {
+
+			CB2J ann = field.getAnnotation(CB2J.class);
+			map.put(ann.path(), field);
+			
+		}
+		
+		pojoTypeMaps.put(clazz, map);
+		
+		return map;
+	}
+
 }

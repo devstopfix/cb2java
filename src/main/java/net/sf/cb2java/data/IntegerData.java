@@ -90,4 +90,23 @@ public class IntegerData extends NumericData
     protected Object toPOJO() {
         return this.getBigInteger();
     }
+
+	@Override
+	public <T> T toPOJO(Class<T> clazz) throws InstantiationException, IllegalAccessException {
+		Object v = null;
+
+		if(clazz.equals(Integer.class)){
+			v = Integer.valueOf(((Integer)getValue()).intValue());
+		}else if(clazz.equals(Long.class)){
+			v = Long.valueOf(((Integer)getValue()).longValue());
+		}else if(clazz.equals(Double.class)){
+			v = Double.valueOf(((Integer)getValue()).doubleValue());
+		}else if(clazz.equals(Boolean.class)){
+			v = Boolean.valueOf(((Integer)getValue()).byteValue()>0);
+		} else{
+			v = ((Integer)getValue());
+		}
+		
+		return (T) v;
+	}
 }
